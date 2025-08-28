@@ -1,2 +1,6 @@
-opencv-python-headless
 streamlit
+opencv-python-headless
+tensorflow
+numpy
+pandas
+

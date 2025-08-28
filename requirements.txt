@@ -3,4 +3,5 @@ opencv-python-headless
 tensorflow
 numpy
 pandas
+streamlit-webrtc
 

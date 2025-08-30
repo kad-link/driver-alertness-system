@@ -215,9 +215,9 @@ def main():
         """)
         
         if webrtc_ctx.state.playing:
-            st.success("Camera Active")
+            st.success("CAM active")
         else:
-            st.error("Camera Inactive")
+            st.error("TURN ON THE CAM!")
 
 if __name__ == "__main__":
     main()

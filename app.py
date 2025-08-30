@@ -32,17 +32,17 @@ def load_model_safely(model_path):
     print(f"Loading model from {model_path}...")
     
     if not os.path.exists(model_path):
-        print(f"❌ Model file not found: {model_path}")
+        print(f"Model file not found: {model_path}")
         return None
     
     try:
-        print("🔄 Loading model weights...")
+        print("Loading model weights...")
         model = create_model_architecture()
         model.load_weights(model_path)
-        print("✅ Model loaded successfully!")
+        print("Model loaded successfully!")
         return model
     except Exception as e:
-        print(f"❌ Model loading failed: {e}")
+        print(f"Model loading failed: {e}")
     
     return None
 
@@ -52,9 +52,9 @@ class HaarEyeDetector:
         try:
             self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
             self.eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
-            print("✅ Haar cascades loaded successfully")
+            print("Haar cascades loaded successfully")
         except Exception as e:
-            print(f"❌ Error loading Haar cascades: {e}")
+            print(f"Error loading Haar cascades: {e}")
             self.face_cascade = None
             self.eye_cascade = None
         
@@ -211,13 +211,13 @@ def run_improved_drowsiness_detection(model_path):
     
     model = load_model_safely(model_path)
     if model is None:
-        print("⚠️  Running without ML model (Haar cascade only)")
+        print("Running without ML model (Haar cascade only)")
     
     detector = ImprovedDrowsinessDetector(model)
     
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("❌ Error: Could not open webcam")
+        print("Error: Could not open webcam")
         return
     
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -259,10 +259,10 @@ def run_improved_drowsiness_detection(model_path):
                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
                 
                 if detector.should_alert():
-                    cv2.putText(frame, "⚠️ WAKE UP! ⚠️", (10, 150), 
+                    cv2.putText(frame, "WAKE UP! ", (10, 150), 
                                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
                     if frame_count % 10 == 0:  
-                        print(f"🚨 WAKE UP ALERT! Eyes closed for {closed_duration:.1f} seconds!")
+                        print(f"WAKE UP ALERT! Eyes closed for {closed_duration:.1f} seconds!")
             
             cv2.imshow('Drowsiness Detection - 2 Second Rule', frame)
             

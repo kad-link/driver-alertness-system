@@ -165,7 +165,7 @@ class DrowsinessProcessor(VideoProcessorBase):
 def main():
     st.set_page_config(page_title="Drowsiness Detection", layout="wide")
     
-    st.title("Drowsiness Detection System")
+    st.title("Driver Drowsiness Detection System")
     st.markdown("Check your infotainment screen for real-time monitoring")
     
     face_cascade, eye_cascade = load_cascades()
@@ -178,10 +178,10 @@ def main():
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.subheader("Live Camera Feed")
+        st.subheader("Live Video")
         
         if model:
-            st.success("ML Model loaded")
+            st.success("Drive cautiously")
         else:
             st.info("Using basic detection only")
         

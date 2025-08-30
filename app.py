@@ -166,7 +166,7 @@ def main():
     st.set_page_config(page_title="Drowsiness Detection", layout="wide")
     
     st.title("Drowsiness Detection System")
-    st.markdown("Real-time drowsiness detection using computer vision")
+    st.markdown("Check your infotainment screen for real-time monitoring")
     
     face_cascade, eye_cascade = load_cascades()
     model = load_model()
@@ -204,7 +204,7 @@ def main():
         
         st.info("""
         **Features:**
-        - Face detection
+        - Real-time Face detection
         - Eye closure monitoring
         - 2-second alert threshold
         

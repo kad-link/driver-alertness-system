@@ -31,7 +31,6 @@ def load_model():
     try:
         tf.keras.utils.disable_interactive_logging()
         
-        # Define CNN feature extractor
         cnn = tf.keras.Sequential([
             tf.keras.layers.Conv2D(32, (3,3), activation='relu', input_shape=(32,32,3)),
             tf.keras.layers.MaxPooling2D((2,2)),
@@ -41,7 +40,6 @@ def load_model():
             tf.keras.layers.Dense(128, activation='relu')
         ])
 
-        # Define full LSTM+CNN model
         model = tf.keras.Sequential([
             tf.keras.layers.TimeDistributed(cnn, input_shape=(10, 32, 32, 3)),
             tf.keras.layers.LSTM(64),
@@ -52,7 +50,7 @@ def load_model():
         
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         model.load_weights(model_path)
-        st.success("LSTM+CNN model loaded successfully!")
+        st.success("So far so good...")
         return model
     except Exception as e:
         st.error(f"Model loading failed: {e}")
@@ -70,9 +68,7 @@ class LSTMDrowsinessDetector:
     def preprocess_frame(self, frame):
         """Preprocess frame for LSTM+CNN model"""
         try:
-            # Resize frame to model input size
             resized = cv2.resize(frame, IMG_SIZE)
-            # Normalize pixel values to [0, 1]
             normalized = resized.astype(np.float32) / 255.0
             return normalized
         except Exception as e:
@@ -87,24 +83,20 @@ class LSTMDrowsinessDetector:
         try:
             current_time = time.time()
             
-            # Preprocess current frame
             processed_frame = self.preprocess_frame(frame)
             self.frame_sequence.append(processed_frame)
             
-            # Need full sequence for prediction
             if len(self.frame_sequence) < SEQUENCE_LENGTH:
                 remaining = SEQUENCE_LENGTH - len(self.frame_sequence)
                 return True, False, f"Initializing... ({remaining} frames)", 0.0, 0.0
             
-            # Prepare sequence for model
             sequence = np.array(list(self.frame_sequence))
             sequence = np.expand_dims(sequence, axis=0)  # Add batch dimension
             
-            # Make prediction
             drowsiness_prob = self.model.predict(sequence, verbose=0)[0][0]
             is_drowsy = drowsiness_prob > self.drowsiness_threshold
             
-            # Track drowsiness duration
+            
             if is_drowsy:
                 if not self.currently_drowsy:
                     self.drowsy_start_time = current_time
@@ -142,7 +134,6 @@ class DrowsinessProcessor(VideoProcessorBase):
         
         self.frame_count += 1
         
-        # Process every 2nd frame to reduce computational load
         if self.frame_count % 2 == 0:
             try:
                 detection_success, is_drowsy, status, drowsy_duration, confidence = self.detector.detect_drowsiness(img)
@@ -158,33 +149,30 @@ class DrowsinessProcessor(VideoProcessorBase):
             except Exception as e:
                 self.last_status = f"Processing error: {str(e)}"
         
-        # Determine text color based on drowsiness state
         if "WAKE UP" in self.last_status:
-            text_color = (0, 0, 255)  # Red for alert
+            text_color = (0, 0, 255)  
         elif "Drowsiness detected" in self.last_status:
-            text_color = (0, 165, 255)  # Orange for warning
+            text_color = (0, 165, 255)  
         elif "Alert" in self.last_status:
-            text_color = (0, 255, 0)  # Green for alert
+            text_color = (0, 255, 0)  
         else:
-            text_color = (255, 255, 255)  # White for other states
+            text_color = (255, 255, 255)  
         
-        # Add status overlay
         cv2.putText(img, f"Status: {self.last_status}", (10, 30), 
                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, text_color, 2)
         
-        # Add confidence score
+        
         if self.last_confidence > 0:
             confidence_text = f"Drowsiness Confidence: {self.last_confidence:.2f}"
             cv2.putText(img, confidence_text, (10, 60), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
         
-        # Add duration timer if drowsy
         if self.last_drowsy_duration > 0:
             timer_text = f"Drowsy Duration: {self.last_drowsy_duration:.1f}s"
             cv2.putText(img, timer_text, (10, 90), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
         
-        # Add frame info
+       
         frame_info = f"Frame: {self.frame_count} | Seq: {len(self.detector.frame_sequence)}/{SEQUENCE_LENGTH}"
         cv2.putText(img, frame_info, (10, img.shape[0] - 20), 
                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
@@ -194,21 +182,21 @@ class DrowsinessProcessor(VideoProcessorBase):
 def main():
     st.set_page_config(page_title="LSTM+CNN Drowsiness Detection", layout="wide")
     
-    st.title("🚗 Advanced Driver Drowsiness Detection")
-    st.markdown("**AI-Powered LSTM+CNN Model for Real-time Drowsiness Detection**")
+    st.title(" Driver Drowsiness Detection System")
+    st.markdown("**Check your infotainment screen for cautions **")
     
-    # Load the LSTM+CNN model
+    
     model = load_model()
     
     if model is None:
-        st.error("❌ Cannot proceed without the LSTM+CNN model. Please ensure 'drowsiness_model.h5' is available.")
-        st.info("📝 **Requirements:**\n- TensorFlow installed\n- Trained drowsiness_model.h5 file in the current directory")
+        st.error(" Cannot proceed without the LSTM+CNN model. Please ensure 'drowsiness_model.h5' is available.")
+        st.info(" **Requirements:**\n- TensorFlow installed\n- Trained drowsiness_model.h5 file in the current directory")
         return
     
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        st.subheader("🎥 Live Detection Feed")
+        st.subheader("Live Cam")
         
         rtc_configuration = RTCConfiguration({
             "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
@@ -225,31 +213,17 @@ def main():
         )
     
     with col2:
-        st.subheader("🔍 Model Information")
-        
-        st.info(f"""
-        **LSTM+CNN Architecture:**
-        - **Input:** {SEQUENCE_LENGTH} frame sequences ({IMG_SIZE[0]}×{IMG_SIZE[1]} pixels)
-        - **CNN:** Feature extraction layers
-        - **LSTM:** Temporal pattern recognition
-        - **Output:** Drowsiness probability (0-1)
-        - **Threshold:** {0.5} for drowsiness classification
-        - **Alert Trigger:** 2+ seconds of continuous drowsiness
-        """)
         
         st.subheader("📋 Instructions")
         st.markdown("""
-        1. **Allow camera access** when prompted
-        2. **Position yourself** clearly in the camera view
-        3. **Wait for initialization** (10 frames needed)
-        4. **Test the system** by closing your eyes for 2+ seconds
-        5. **Monitor the confidence scores** and status updates
+        1. **Allow camera access** if not given
+        2. Face the camera clearly 
         """)
         
         if webrtc_ctx.state.playing:
             st.success("🟢 **Camera Active** - LSTM+CNN model running")
         else:
-            st.error("🔴 **Camera Inactive** - Click 'START' to begin detection")
+            st.error("TURN ON YOUR CAM ")
         
         st.subheader("⚠️ Alert Levels")
         st.markdown("""
